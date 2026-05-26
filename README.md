@@ -1,9 +1,9 @@
 ![Ruff](https://img.shields.io/badge/ruff-enabled-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-# Python App Template
+# Assearch
 
-This project provides a starter structure and tooling for Python apps, aiming for a consistent and modern dev experience.
+Fast search engine for french assocations
 
 ## Installation
 
@@ -32,18 +32,39 @@ To run it in production mode:
   uv run fastapi run
 ```
 
+## Data pipeline
+
+The data pipeline is source-only and its dependencies are kept out of the main
+application install. Run it with the dedicated dependency group:
+
+```bash
+  PYTHONPATH=src uv run --group data-pipeline python -m data_pipeline.cli all
+```
+
+Download only:
+
+```bash
+  PYTHONPATH=src uv run --group data-pipeline python -m data_pipeline.cli download
+```
+
+Index existing downloaded data only:
+
+```bash
+  PYTHONPATH=src uv run --group data-pipeline python -m data_pipeline.cli index
+```
+
 ## Docker
 
 Build the image:
 
 ```bash
-  docker build -t fastapi .
+  docker build -t assearch .
 ```
 
 Run the container:
 
 ```bash
-  docker run --rm fastapi
+  docker run --rm assearch
 ```
 
 ## Tests, linting and formatting

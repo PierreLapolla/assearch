@@ -166,3 +166,5 @@ tests/
 docs/
 *.md
 !README.md
+
+/data

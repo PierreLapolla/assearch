@@ -1,37 +1,33 @@
 [project]
-name = "app"
+name = "assearch"
 version = "0.1.0"
-description = "Add your description here"
+description = "Fast search engine for french assocations"
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [
     { name = "Pierre LAPOLLA", email = "pro@pierrelapolla.com" },
 ]
 keywords = []
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: 3.14",
-    "Typing :: Typed",
-]
+classifiers = []
 requires-python = ">=3.10"
 dependencies = [
+    "elasticsearch>=9.4.0",
     "fastapi[standard]>=0.136.1",
     "pydantic>=2.13.4",
 ]
 
 [project.urls]
-Repository = "https://github.com/PierreLapolla/python_template"
+Repository = "https://github.com/PierreLapolla/assearch"
 
 [tool.fastapi]
-entrypoint = "app.main:app"
+entrypoint = "assearch.main:app"
 
 [dependency-groups]
+data-pipeline = [
+    "pedros>=0.1.0",
+    "polars>=1.36.1",
+    "requests>=2.32.5",
+]
 dev = [
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
@@ -52,7 +48,7 @@ include = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/app"]
+packages = ["src/assearch"]
 
 [tool.pytest.ini_options]
 minversion = "8.0"
@@ -60,7 +56,7 @@ addopts = [
     "-ra",
     "--strict-config",
     "--strict-markers",
-    "--cov=app",
+    "--cov=assearch",
     "--cov-report=term-missing",
     "--cov-report=html",
 ]
@@ -69,7 +65,7 @@ pythonpath = ["src"]
 
 [tool.coverage.run]
 branch = true
-source = ["app"]
+source = ["assearch"]
 
 [tool.coverage.report]
 show_missing = true

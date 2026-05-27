@@ -1,9 +1,9 @@
 services:
   api:
-    build: .
+    build: ./backend
     container_name: assearch
     env_file:
-      - .env
+      - ./backend/.env
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
 

@@ -1,4 +1,5 @@
 from collections.abc import AsyncIterator
+from os import getenv
 from typing import Annotated, Any
 
 from elasticsearch import AsyncElasticsearch, TransportError
@@ -6,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from assearch.schemas.search import SearchResponse, SearchResult
 
-ELASTICSEARCH_URL = "http://localhost:9200"
+ELASTICSEARCH_URL = getenv("ELASTICSEARCH_URL", "http://localhost:9200")
 INDEX_NAME = "associations"
 SEARCH_FIELDS = ("title^3", "description", "city^2", "postal_code", "website")
 

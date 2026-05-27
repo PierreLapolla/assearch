@@ -16,6 +16,7 @@ Fast search engine for french assocations
 
 ```bash
   uv sync
+  uv run opentelemetry-bootstrap -a install
 ```
 
 ## Running the project
@@ -30,6 +31,12 @@ To run it in production mode:
 
 ```bash
   uv run fastapi run
+```
+
+Run locally with telemetry enabled:
+
+```bash
+  uv run --env-file .env opentelemetry-instrument fastapi dev
 ```
 
 ## Data pipeline
@@ -61,10 +68,16 @@ Build the image:
   docker build -t assearch .
 ```
 
-Run the container:
+Run the container locally:
 
 ```bash
-  docker run --rm assearch
+  docker run --rm --env-file .env -p 8000:8000 assearch
+```
+
+Run all services together:
+
+```bash
+   docker compose up --build
 ```
 
 ## Tests, linting and formatting

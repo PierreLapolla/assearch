@@ -2,15 +2,8 @@ services:
   api:
     build: ./backend
     container_name: assearch
-    env_file:
-      - ./backend/.env
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
-
-      # Recommended so metrics/traces are explicitly exported
-      OTEL_METRICS_EXPORTER: otlp
-      OTEL_TRACES_EXPORTER: otlp
-      OTEL_LOGS_EXPORTER: none
 
     ports:
       - "8000:8000"

@@ -118,6 +118,7 @@ function AssociationCard({ result }: { result: SearchResult }) {
             <p className="text-sm text-muted-foreground leading-relaxed">{descriptionText}</p>
             {longDescription && (
               <button
+                type="button"
                 onClick={() => setExpanded(!expanded)}
                 className="text-xs text-primary hover:underline mt-1 cursor-pointer"
               >

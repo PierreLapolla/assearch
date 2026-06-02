@@ -5,7 +5,7 @@ export function SiteHeader() {
       <div className="bg-[#000091] text-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-2 flex items-center gap-3">
           {/* RF tricolor logo placeholder */}
-          <div className="flex h-8 w-8 shrink-0 overflow-hidden rounded-sm" aria-hidden="true">
+          <div className="flex size-8 shrink-0 overflow-hidden rounded-sm" aria-hidden="true">
             <div className="flex-1 bg-[#000091]" />
             <div className="flex-1 bg-white" />
             <div className="flex-1 bg-[#e1000f]" />
@@ -23,7 +23,7 @@ export function SiteHeader() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 flex items-center gap-4">
           {/* Service logo placeholder */}
           <div
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded bg-[#000091] text-white"
+            className="flex size-14 shrink-0 items-center justify-center rounded bg-[#000091] text-white"
             aria-label="Logo Assearch (placeholder)"
           >
             <svg

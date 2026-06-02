@@ -47,9 +47,15 @@ INDEX_MAPPINGS = {
         "id": {"type": "keyword"},
         "title": {"type": "text", "analyzer": "french_text"},
         "description": {"type": "text", "analyzer": "french_text"},
+        "address": {"type": "text", "analyzer": "french_text"},
         "city": {"type": "keyword"},
         "postal_code": {"type": "keyword"},
         "website": {"type": "keyword", "ignore_above": 512},
+        "date_creat": {"type": "date", "format": "yyyy-MM-dd||strict_date_optional_time"},
+        "date_disso": {"type": "date", "format": "yyyy-MM-dd||strict_date_optional_time"},
+        "position": {"type": "keyword"},
+        "nature": {"type": "keyword"},
+        "groupement": {"type": "keyword"},
     }
 }
 

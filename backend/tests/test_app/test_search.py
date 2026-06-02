@@ -8,7 +8,10 @@ class FakeElasticsearch:
     async def search(self, **kwargs):
         assert kwargs["index"] == "associations"
         assert kwargs["size"] == 2
-        assert kwargs["query"]["multi_match"]["query"] == "football"
+        q = kwargs["query"]
+        # when include_legacy=False the query is wrapped in bool/must_not
+        multi_match = q.get("multi_match") or q["bool"]["must"]["multi_match"]
+        assert multi_match["query"] == "football"
 
         return {
             "hits": {
@@ -45,9 +48,15 @@ def test_search() -> None:
                 "source": "waldec",
                 "title": "Club de football",
                 "description": "Association sportive",
+                "address": None,
                 "city": "Lyon",
                 "postal_code": "69000",
                 "website": "https://example.org",
+                "date_creat": None,
+                "date_disso": None,
+                "position": None,
+                "nature": None,
+                "groupement": None,
             }
         ],
     }

@@ -9,7 +9,7 @@ from assearch.schemas.search import SearchResponse, SearchResult
 
 ELASTICSEARCH_URL = getenv("ELASTICSEARCH_URL", "http://localhost:9200")
 INDEX_NAME = "associations"
-SEARCH_FIELDS = ("title^3", "description", "city^2", "postal_code", "website")
+SEARCH_FIELDS = ("title^3", "description", "address", "city^2", "postal_code", "website")
 
 router = APIRouter(prefix="/search", tags=["search"])
 
@@ -46,9 +46,15 @@ def result_from_hit(hit: dict[str, Any]) -> SearchResult:
         source=source.get("source"),
         title=source.get("title"),
         description=source.get("description"),
+        address=source.get("address"),
         city=source.get("city"),
         postal_code=source.get("postal_code"),
         website=source.get("website"),
+        date_creat=source.get("date_creat"),
+        date_disso=source.get("date_disso"),
+        position=source.get("position"),
+        nature=source.get("nature"),
+        groupement=source.get("groupement"),
     )
 
 
@@ -57,20 +63,33 @@ async def search(
     query: Annotated[str, Query(min_length=1, max_length=200)],
     client: ElasticsearchClientDep,
     limit: Annotated[int, Query(ge=1, le=50)] = 10,
+    include_legacy: Annotated[bool, Query()] = False,
 ) -> SearchResponse:
+    must_query: dict[str, Any] = {
+        "multi_match": {
+            "query": query,
+            "fields": SEARCH_FIELDS,
+            "type": "best_fields",
+            "operator": "and",
+            "fuzziness": "AUTO",
+        }
+    }
+
+    if include_legacy:
+        es_query = must_query
+    else:
+        es_query = {
+            "bool": {
+                "must": must_query,
+                "must_not": {"term": {"source": "import"}},
+            }
+        }
+
     try:
         response = await client.search(
             index=INDEX_NAME,
             size=limit,
-            query={
-                "multi_match": {
-                    "query": query,
-                    "fields": SEARCH_FIELDS,
-                    "type": "best_fields",
-                    "operator": "and",
-                    "fuzziness": "AUTO",
-                }
-            },
+            query=es_query,
         )
     except TransportError as error:
         raise HTTPException(

@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* Marianne — official French government typeface (SIL OFL, via jsDelivr / DSFR) */
+/* Marianne — official French government typeface (SIL OFL, via jsDelivr / DSFR 1.11.2) */
 @font-face {
   font-family: "Marianne";
   src: url("https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.11.2/dist/fonts/Marianne-Light.woff2") format("woff2");
@@ -60,10 +60,18 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  /* DSFR status badge tokens */
+  --color-badge-success: var(--badge-success);
+  --color-badge-success-bg: var(--badge-success-bg);
+  --color-badge-success-border: var(--badge-success-border);
+  --color-badge-warning: var(--badge-warning);
+  --color-badge-warning-bg: var(--badge-warning-bg);
+  --color-badge-warning-border: var(--badge-warning-border);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -75,14 +83,15 @@
 
 :root {
   /* DSFR — Design System de l'État */
-  --background: oklch(0.974 0 0);           /* #f6f6f6 */
-  --foreground: oklch(0.145 0 0);           /* #161616 */
+  --background: oklch(0.974 0 0);
+  --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.237 0.197 264);        /* #000091 bleu France */
   --primary-foreground: oklch(1 0 0);
+  --primary-hover: oklch(0.40 0.28 264);    /* #1212ff hover state */
   --secondary: oklch(0.940 0.040 264);      /* #e8edff bleu clair */
   --secondary-foreground: oklch(0.237 0.197 264);
   --muted: oklch(0.955 0 0);
@@ -93,7 +102,7 @@
   --border: oklch(0.896 0 0);
   --input: oklch(0.896 0 0);
   --ring: oklch(0.237 0.197 264);
-  --radius: 0.25rem;                        /* DSFR uses sharp corners */
+  --radius: 0.25rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.237 0.197 264);
@@ -102,6 +111,13 @@
   --sidebar-accent-foreground: oklch(0.237 0.197 264);
   --sidebar-border: oklch(0.896 0 0);
   --sidebar-ring: oklch(0.237 0.197 264);
+  /* DSFR status badge tokens */
+  --badge-success: oklch(0.42 0.14 152);        /* #18753c */
+  --badge-success-bg: oklch(0.97 0.05 152);     /* #dffee7 */
+  --badge-success-border: oklch(0.90 0.08 152); /* #b8ffd8 */
+  --badge-warning: oklch(0.52 0.13 88);         /* #716800 */
+  --badge-warning-bg: oklch(0.98 0.05 88);      /* #fff3cd */
+  --badge-warning-border: oklch(0.92 0.09 88);  /* #ffe58f */
   --font-sans: "Marianne", system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, monospace;
 }

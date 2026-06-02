@@ -1,52 +1,42 @@
+import { Search } from "lucide-react";
+
 export function SiteHeader() {
   return (
-    <header>
-      {/* République Française top bar */}
-      <div className="bg-[#000091] text-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-2 flex items-center gap-3">
-          {/* RF tricolor logo placeholder */}
-          <div className="flex size-8 shrink-0 overflow-hidden rounded-sm" aria-hidden="true">
-            <div className="flex-1 bg-[#000091]" />
-            <div className="flex-1 bg-white" />
-            <div className="flex-1 bg-[#e1000f]" />
-          </div>
-          <span className="text-sm font-medium tracking-wide">
-            République<br className="sm:hidden" />
-            <span className="hidden sm:inline"> </span>
-            Française
-          </span>
-        </div>
-      </div>
-
-      {/* Service header */}
-      <div className="bg-white border-b-4 border-[#000091]">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 flex items-center gap-4">
-          {/* Service logo placeholder */}
+    <header className="bg-card border-b-4 border-primary shadow-sm">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+        {/* Brand */}
+        <div className="flex items-center gap-3">
+          {/* Logo placeholder — tricolor strip + search icon */}
           <div
-            className="flex size-14 shrink-0 items-center justify-center rounded bg-[#000091] text-white"
+            className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded bg-primary text-primary-foreground"
             aria-label="Logo Assearch (placeholder)"
           >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="size-7"
-              aria-hidden="true"
-            >
-              <circle cx="11" cy="11" r="7" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
+            <Search className="size-6 relative z-10" aria-hidden="true" />
+            {/* Tricolor strip at bottom of logo */}
+            <div className="absolute bottom-0 left-0 right-0 h-2 flex" aria-hidden="true">
+              <div className="flex-1 bg-primary" />
+              <div className="flex-1 bg-primary-foreground" />
+              <div className="flex-1 bg-destructive" />
+            </div>
           </div>
 
           <div>
-            <p className="text-xl font-bold text-[#000091] leading-tight">Assearch</p>
-            <p className="text-sm text-[#666666] leading-tight">
+            <span className="block text-lg font-bold text-primary leading-tight tracking-tight">
+              Assearch
+            </span>
+            <span className="block text-xs text-muted-foreground leading-tight">
               Répertoire National des Associations
-            </p>
+            </span>
           </div>
+        </div>
+
+        {/* Source attribution */}
+        <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">
+          <span
+            className="inline-block size-2 rounded-full bg-badge-success"
+            aria-hidden="true"
+          />
+          Données officielles · data.gouv.fr
         </div>
       </div>
     </header>

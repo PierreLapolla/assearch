@@ -1,4 +1,6 @@
 {
+  "url": "http://localhost:3000",
+  "routes": ["/preview"],
   "breakpoints": [375, 768, 1280],
   "outputDir": ".bones",
   "animate": "shimmer"

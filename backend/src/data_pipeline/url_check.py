@@ -2,6 +2,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections.abc import Iterable
 
 import requests
+from pedros import progbar
 
 TIMEOUT = 5.0
 CONCURRENCY = 30
@@ -26,7 +27,7 @@ def check_urls(urls: Iterable[str]) -> dict[str, bool]:
     results: dict[str, bool] = {}
     with ThreadPoolExecutor(max_workers=CONCURRENCY) as pool:
         futures = {pool.submit(_check_one, url): url for url in unique}
-        for future in as_completed(futures):
+        for future in progbar(as_completed(futures), desc="Checking URLs", total=len(unique)):
             url, ok = future.result()
             results[url] = ok
 

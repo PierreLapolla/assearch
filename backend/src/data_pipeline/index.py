@@ -167,15 +167,10 @@ def index_data(
     sources = list(parquet_sources(data_path=data_path))
 
     # Phase 1: collect all website URLs across both sources
-    print("Collecting website URLs…")
     url_by_id = collect_website_urls(sources)
-    print(f"  {len(url_by_id):,} URLs found")
 
-    # Phase 2: check reachability concurrently
-    print("Checking URLs…")
+    # Phase 2: check reachability concurrently (progbar shown inside check_urls)
     url_status = check_urls(url_by_id.values())
-    reachable = sum(url_status.values())
-    print(f"  {reachable:,}/{len(url_status):,} URLs reachable")
 
     # Phase 3: build doc_id → website_ok lookup
     website_ok_by_id = {doc_id: url_status[url] for doc_id, url in url_by_id.items()}

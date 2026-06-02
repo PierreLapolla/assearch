@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useReducer } from "react";
 import { toast } from "sonner";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,20 +13,59 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const RESULTS_LIMIT = 20;
 const SKELETON_COUNT = 5;
 
+// ── State machine ────────────────────────────────────────────────────────────
+
+type State = {
+  query: string;
+  results: SearchResult[];
+  total: number | null;
+  loading: boolean;
+  includeLegacy: boolean;
+  hasSearched: boolean;
+};
+
+type Action =
+  | { type: "SET_QUERY"; query: string }
+  | { type: "SET_LEGACY"; includeLegacy: boolean }
+  | { type: "SEARCH_START" }
+  | { type: "SEARCH_SUCCESS"; results: SearchResult[]; total: number }
+  | { type: "SEARCH_ERROR" };
+
+const initialState: State = {
+  query: "",
+  results: [],
+  total: null,
+  loading: false,
+  includeLegacy: false,
+  hasSearched: false,
+};
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "SET_QUERY":
+      return { ...state, query: action.query };
+    case "SET_LEGACY":
+      return { ...state, includeLegacy: action.includeLegacy };
+    case "SEARCH_START":
+      return { ...state, loading: true, hasSearched: true };
+    case "SEARCH_SUCCESS":
+      return { ...state, loading: false, results: action.results, total: action.total };
+    case "SEARCH_ERROR":
+      return { ...state, loading: false, results: [], total: null };
+  }
+}
+
+// ── Component ────────────────────────────────────────────────────────────────
+
 export default function Home() {
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [total, setTotal] = useState<number | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [includeLegacy, setIncludeLegacy] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { query, results, total, loading, includeLegacy, hasSearched } = state;
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     if (!query.trim()) return;
 
-    setLoading(true);
-    setHasSearched(true);
+    dispatch({ type: "SEARCH_START" });
 
     try {
       const params = new URLSearchParams({
@@ -37,16 +76,12 @@ export default function Home() {
       const res = await fetch(`${API_URL}/search?${params}`);
       if (!res.ok) throw new Error(`Erreur serveur (${res.status})`);
       const data: SearchResponse = await res.json();
-      setResults(data.results);
-      setTotal(data.total);
+      dispatch({ type: "SEARCH_SUCCESS", results: data.results, total: data.total });
     } catch (err) {
+      dispatch({ type: "SEARCH_ERROR" });
       toast.error("Recherche échouée", {
         description: err instanceof Error ? err.message : "Recherche impossible",
       });
-      setResults([]);
-      setTotal(null);
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -79,7 +114,7 @@ export default function Home() {
                 />
                 <Input
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(e) => dispatch({ type: "SET_QUERY", query: e.target.value })}
                   placeholder="Nom, objet, ville, code postal…"
                   className="h-14 pl-12 text-base rounded-r-none border-input bg-card focus-visible:ring-primary focus-visible:border-primary"
                   aria-label="Rechercher une association"
@@ -99,7 +134,7 @@ export default function Home() {
               <Switch
                 id="legacy-toggle"
                 checked={includeLegacy}
-                onCheckedChange={setIncludeLegacy}
+                onCheckedChange={(v) => dispatch({ type: "SET_LEGACY", includeLegacy: v })}
               />
               <label htmlFor="legacy-toggle" className="cursor-pointer select-none">
                 Inclure les associations historiques (données antérieures à 2009)

@@ -63,7 +63,7 @@ export default function PreviewPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 space-y-4">
       <p className="text-xs text-muted-foreground border border-dashed border-border rounded px-3 py-2">
-        Page de capture boneyard — uniquement visible en développement.
+        Page de capture boneyard{" — "}uniquement visible en développement.
       </p>
       {SAMPLE_RESULTS.map((r) => (
         <AssociationCard key={r.id} result={r} />

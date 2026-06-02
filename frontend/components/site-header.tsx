@@ -36,7 +36,7 @@ export function SiteHeader() {
             className="inline-block size-2 rounded-full bg-badge-success"
             aria-hidden="true"
           />
-          Données officielles · data.gouv.fr
+          {/* · */}Données officielles{" · "}data.gouv.fr
         </div>
       </div>
     </header>

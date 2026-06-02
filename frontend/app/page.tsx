@@ -6,7 +6,6 @@ import { Search, MapPin, Globe, Calendar, Users, AlertTriangle, Clock } from "lu
 import { Skeleton } from "boneyard-js/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
@@ -36,10 +35,10 @@ interface SearchResponse {
   results: SearchResult[];
 }
 
-const POSITION_LABELS: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  A: { label: "Active", variant: "default" },
-  D: { label: "Dissoute", variant: "secondary" },
-  S: { label: "Supprimée", variant: "destructive" },
+const POSITION_LABELS: Record<string, { label: string; className: string }> = {
+  A: { label: "Active", className: "bg-[#dffee7] text-[#18753c] border-[#b8ffd8]" },
+  D: { label: "Dissoute", className: "bg-[#fff3cd] text-[#716800] border-[#ffe58f]" },
+  S: { label: "Supprimée", className: "bg-[#fde8e8] text-[#c9191e] border-[#ffbcbc]" },
 };
 
 const GROUPEMENT_LABELS: Record<string, string> = {
@@ -72,7 +71,7 @@ function AssociationCard({ result, loading = false }: { result?: SearchResult; l
   const [expanded, setExpanded] = useState(false);
 
   const isLegacy = result?.source === "import";
-  const posInfo = result?.position ? POSITION_LABELS[result.position] : null;
+  const posStyle = result?.position ? POSITION_LABELS[result.position] : null;
   const groupLabel = result?.groupement ? GROUPEMENT_LABELS[result.groupement] : null;
   const dateCreat = formatDate(result?.date_creat ?? null);
   const dateDisso = formatDate(result?.date_disso ?? null);
@@ -83,111 +82,106 @@ function AssociationCard({ result, loading = false }: { result?: SearchResult; l
 
   return (
     <Skeleton name="association-card" loading={loading} animate="shimmer">
-      <Card className="transition-shadow hover:shadow-md">
-        <CardHeader className="pb-2">
-          <div className="flex flex-wrap items-start gap-2">
-            <CardTitle className="text-base font-semibold leading-snug flex-1 min-w-0">
-              {result?.title ?? "Sans titre"}
-            </CardTitle>
-            <div className="flex flex-wrap gap-1.5 shrink-0">
-              {isLegacy && (
-                <Badge
-                  variant="outline"
-                  className="text-xs text-amber-600 border-amber-300 bg-amber-50"
-                >
-                  Historique
-                </Badge>
-              )}
-              {posInfo && (
-                <Badge variant={posInfo.variant} className="text-xs">
-                  {posInfo.label}
-                </Badge>
-              )}
-            </div>
+      <article className="bg-white border border-[#dddddd] border-l-4 border-l-[#000091] p-5 hover:shadow-md transition-shadow">
+        {/* Title row */}
+        <div className="flex flex-wrap items-start gap-2 mb-1">
+          <h2 className="text-base font-bold text-[#000091] flex-1 min-w-0 leading-snug">
+            {result?.title ?? "Sans titre"}
+          </h2>
+          <div className="flex flex-wrap gap-1.5 shrink-0">
+            {isLegacy && (
+              <span className="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium bg-[#fff3cd] text-[#716800] border border-[#ffe58f]">
+                Données historiques
+              </span>
+            )}
+            {posStyle && (
+              <span
+                className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium border ${posStyle.className}`}
+              >
+                {posStyle.label}
+              </span>
+            )}
           </div>
-          {groupLabel && (
-            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-              <Users className="size-3" />
-              {groupLabel}
-            </p>
-          )}
-        </CardHeader>
+        </div>
 
-        <CardContent className="space-y-3">
-          {result?.description && (
-            <div>
-              <p className="text-sm text-muted-foreground leading-relaxed">{descriptionText}</p>
-              {longDescription && (
+        {/* Groupement */}
+        {groupLabel && (
+          <p className="flex items-center gap-1 text-xs text-[#666666] mb-3">
+            <Users className="size-3" aria-hidden="true" />
+            {groupLabel}
+          </p>
+        )}
+
+        {/* Description */}
+        {result?.description && (
+          <p className="text-sm text-[#3a3a3a] leading-relaxed mb-3">
+            {descriptionText}
+            {longDescription && (
+              <>
+                {" "}
                 <button
                   type="button"
                   onClick={() => setExpanded(!expanded)}
-                  className="text-xs text-primary hover:underline mt-1 cursor-pointer"
+                  className="text-[#000091] hover:underline font-medium cursor-pointer"
                 >
                   {expanded ? "Voir moins" : "Voir plus"}
                 </button>
-              )}
-            </div>
-          )}
+              </>
+            )}
+          </p>
+        )}
 
-          {(result?.address || result?.city || result?.postal_code) && (
-            <>
-              <Separator />
-              <div className="flex items-start gap-1.5 text-sm text-muted-foreground">
-                <MapPin className="size-3.5 mt-0.5 shrink-0" />
-                <span>
-                  {[
-                    result.address,
-                    result.city && result.postal_code
-                      ? `${result.city} (${result.postal_code})`
-                      : (result.city ?? result.postal_code),
-                  ]
-                    .filter(Boolean)
-                    .join(" — ")}
-                </span>
-              </div>
-            </>
-          )}
+        {/* Address + meta */}
+        {(result?.address || result?.city || result?.postal_code || dateCreat || dateDisso || website) && (
+          <div className="border-t border-[#eeeeee] pt-3 mt-3 flex flex-wrap gap-x-5 gap-y-2">
+            {(result?.address || result?.city || result?.postal_code) && (
+              <span className="flex items-start gap-1.5 text-xs text-[#555555]">
+                <MapPin className="size-3.5 mt-0.5 shrink-0 text-[#000091]" aria-hidden="true" />
+                {[
+                  result?.address,
+                  result?.city && result?.postal_code
+                    ? `${result.city} (${result.postal_code})`
+                    : (result?.city ?? result?.postal_code),
+                ]
+                  .filter(Boolean)
+                  .join(" — ")}
+              </span>
+            )}
+            {dateCreat && (
+              <span className="flex items-center gap-1.5 text-xs text-[#555555]">
+                <Calendar className="size-3 text-[#000091]" aria-hidden="true" />
+                Créée le {dateCreat}
+              </span>
+            )}
+            {dateDisso && (
+              <span className="flex items-center gap-1.5 text-xs text-[#c9191e]">
+                <Clock className="size-3" aria-hidden="true" />
+                Dissoute le {dateDisso}
+              </span>
+            )}
+            {website && (
+              <a
+                href={website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-xs text-[#000091] hover:underline"
+              >
+                <Globe className="size-3" aria-hidden="true" />
+                {safeHostname(website)}
+              </a>
+            )}
+          </div>
+        )}
 
-          {(dateCreat || dateDisso || website) && (
-            <>
-              <Separator />
-              <div className="flex flex-wrap gap-x-4 gap-y-1.5">
-                {dateCreat && (
-                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Calendar className="size-3" />
-                    Créée le {dateCreat}
-                  </span>
-                )}
-                {dateDisso && (
-                  <span className="flex items-center gap-1.5 text-xs text-amber-600">
-                    <Clock className="size-3" />
-                    Dissoute le {dateDisso}
-                  </span>
-                )}
-                {website && (
-                  <a
-                    href={website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-xs text-primary hover:underline"
-                  >
-                    <Globe className="size-3" />
-                    {safeHostname(website)}
-                  </a>
-                )}
-              </div>
-            </>
-          )}
-
-          {isLegacy && (
-            <div className="flex items-start gap-1.5 rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700">
-              <AlertTriangle className="size-3.5 mt-0.5 shrink-0" />
-              Ces données proviennent de l&apos;ancien répertoire et n&apos;ont pas été mises à
-              jour depuis 2009.
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        {/* Legacy warning */}
+        {isLegacy && (
+          <div className="flex items-start gap-2 rounded bg-[#fff3cd] border border-[#ffe58f] px-3 py-2 text-xs text-[#716800] mt-3">
+            <AlertTriangle className="size-3.5 mt-0.5 shrink-0" aria-hidden="true" />
+            Ces données proviennent de l&apos;ancien répertoire et n&apos;ont pas été mises à jour
+            depuis 2009.
+          </div>
+        )}
+      </article>
     </Skeleton>
   );
 }
@@ -229,80 +223,103 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-3xl px-4 py-12 space-y-8">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">Assearch</h1>
-          <p className="text-sm text-muted-foreground">
-            Recherchez parmi les associations françaises du Répertoire National des Associations
-          </p>
-        </div>
+    <div className="flex flex-col flex-1">
+      {/* Hero */}
+      <section className="bg-[#e8edff] border-b border-[#c5cff5] py-12 px-4">
+        <div className="mx-auto max-w-3xl space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold text-[#000091]">
+              Rechercher une association
+            </h1>
+            <p className="text-sm text-[#555555] mt-1">
+              Consultez les associations déclarées en France dans le Répertoire National des Associations.
+            </p>
+          </div>
 
-        <form onSubmit={handleSearch} className="space-y-3">
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
-              <Input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Nom, objet, ville, code postal…"
-                className="pl-9"
-                autoFocus
-              />
+          <form onSubmit={handleSearch} className="space-y-3">
+            {/* Search bar — single prominent line */}
+            <div className="flex gap-0 shadow-sm">
+              <div className="relative flex-1">
+                <Search
+                  className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-[#666666] pointer-events-none"
+                  aria-hidden="true"
+                />
+                <Input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Nom, objet, ville, code postal…"
+                  className="h-14 pl-12 pr-4 text-base rounded-r-none border-[#aaaaaa] bg-white focus-visible:ring-[#000091] focus-visible:border-[#000091]"
+                  aria-label="Rechercher une association"
+                  autoFocus
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={loading || !query.trim()}
+                className="h-14 px-8 rounded-l-none text-base font-medium bg-[#000091] hover:bg-[#1212ff] text-white border-0 cursor-pointer"
+              >
+                {loading ? "Recherche…" : "Rechercher"}
+              </Button>
             </div>
-            <Button type="submit" disabled={loading || !query.trim()}>
-              {loading ? "Recherche…" : "Rechercher"}
-            </Button>
-          </div>
 
-          <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
-            <Switch
-              id="legacy-toggle"
-              checked={includeLegacy}
-              onCheckedChange={setIncludeLegacy}
-            />
-            <label htmlFor="legacy-toggle" className="cursor-pointer select-none">
-              Inclure les associations historiques (avant 2009)
-            </label>
-          </div>
-        </form>
+            {/* Legacy filter */}
+            <div className="flex items-center gap-2.5 text-sm text-[#555555]">
+              <Switch
+                id="legacy-toggle"
+                checked={includeLegacy}
+                onCheckedChange={setIncludeLegacy}
+              />
+              <label htmlFor="legacy-toggle" className="cursor-pointer select-none">
+                Inclure les associations historiques (données antérieures à 2009)
+              </label>
+            </div>
+          </form>
+        </div>
+      </section>
 
-        {!loading && total !== null && (
-          <p className="text-sm text-muted-foreground">
-            {total === 0
-              ? "Aucun résultat pour cette recherche."
-              : `${total.toLocaleString("fr-FR")} résultat${total !== 1 ? "s" : ""} trouvé${total !== 1 ? "s" : ""}`}
-          </p>
-        )}
+      {/* Results */}
+      <section className="flex-1 py-8 px-4 bg-[#f6f6f6]">
+        <div className="mx-auto max-w-3xl space-y-4">
+          {/* Count */}
+          {!loading && total !== null && (
+            <p className="text-sm text-[#555555]">
+              {total === 0
+                ? "Aucun résultat pour cette recherche."
+                : `${total.toLocaleString("fr-FR")} résultat${total !== 1 ? "s" : ""} trouvé${total !== 1 ? "s" : ""}`}
+            </p>
+          )}
 
-        {loading && (
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, i) => (
+          {/* Skeletons */}
+          {loading &&
+            Array.from({ length: 5 }).map((_, i) => (
               <AssociationCard key={i} loading={true} />
             ))}
-          </div>
-        )}
 
-        {!loading && results.length > 0 && (
-          <div className="space-y-4">
-            {results.map((r) => (
-              <AssociationCard key={r.id} result={r} />
-            ))}
-          </div>
-        )}
+          {/* Cards */}
+          {!loading && results.map((r) => <AssociationCard key={r.id} result={r} />)}
 
-        {!loading && hasSearched && total === 0 && (
-          <div className="text-center py-12 text-muted-foreground space-y-2">
-            <Search className="size-10 mx-auto opacity-30" />
-            <p className="text-sm">Aucune association trouvée.</p>
-            {!includeLegacy && (
-              <p className="text-xs">
-                Essayez d&apos;activer les données historiques pour élargir la recherche.
-              </p>
-            )}
-          </div>
-        )}
-      </div>
+          {/* Empty state */}
+          {!loading && hasSearched && total === 0 && (
+            <div className="text-center py-16 space-y-3">
+              <Search className="size-12 mx-auto text-[#aaaaaa]" aria-hidden="true" />
+              <p className="text-[#555555]">Aucune association trouvée.</p>
+              {!includeLegacy && (
+                <p className="text-sm text-[#888888]">
+                  Activez les données historiques pour élargir la recherche.
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Initial state */}
+          {!hasSearched && (
+            <div className="text-center py-16 text-[#aaaaaa]">
+              <Search className="size-12 mx-auto mb-3 opacity-40" aria-hidden="true" />
+              <p className="text-sm">Lancez une recherche pour afficher les résultats.</p>
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

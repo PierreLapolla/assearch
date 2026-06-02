@@ -53,7 +53,6 @@ def test_search() -> None:
                 "city": "Lyon",
                 "postal_code": "69000",
                 "website": "https://example.org",
-                "website_ok": None,
                 "date_creat": None,
                 "date_disso": None,
                 "position": None,

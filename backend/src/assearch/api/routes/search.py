@@ -52,7 +52,6 @@ def result_from_hit(hit: dict[str, Any]) -> SearchResult:
         city=source.get("city"),
         postal_code=source.get("postal_code"),
         website=source.get("website"),
-        website_ok=source.get("website_ok"),
         date_creat=source.get("date_creat"),
         date_disso=source.get("date_disso"),
         position=source.get("position"),

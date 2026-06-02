@@ -63,6 +63,7 @@ async def search(
     query: Annotated[str, Query(min_length=1, max_length=200)],
     client: ElasticsearchClientDep,
     limit: Annotated[int, Query(ge=1, le=50)] = 10,
+    offset: Annotated[int, Query(ge=0, le=10000)] = 0,
     include_legacy: Annotated[bool, Query()] = False,
 ) -> SearchResponse:
     must_query: dict[str, Any] = {
@@ -89,6 +90,7 @@ async def search(
         response = await client.search(
             index=INDEX_NAME,
             size=limit,
+            from_=offset,
             query=es_query,
         )
     except TransportError as error:

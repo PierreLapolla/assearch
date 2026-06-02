@@ -2,8 +2,9 @@
 
 import "@/bones/registry";
 import { useState } from "react";
-import { MapPin, Globe, Calendar, Clock, Users, AlertTriangle } from "lucide-react";
+import { MapPin, Globe, Calendar, Clock, Users } from "lucide-react";
 import { Skeleton } from "boneyard-js/react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { SearchResult } from "@/lib/types";
 
@@ -93,9 +94,17 @@ export function AssociationCard({ result, loading = false }: Props) {
           </h2>
           <div className="flex flex-wrap gap-1.5 shrink-0">
             {isLegacy && (
-              <span className="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium text-badge-warning bg-badge-warning-bg border border-badge-warning-border">
-                Données historiques
-              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium text-badge-warning bg-badge-warning-bg border border-badge-warning-border cursor-help">
+                    Données historiques
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-60 text-center">
+                  Ces données proviennent de l&apos;ancien répertoire et n&apos;ont pas été mises
+                  à jour depuis 2009.
+                </TooltipContent>
+              </Tooltip>
             )}
             {posConfig && (
               <span
@@ -179,14 +188,6 @@ export function AssociationCard({ result, loading = false }: Props) {
           </div>
         )}
 
-        {/* Legacy warning */}
-        {isLegacy && (
-          <div className="flex items-start gap-2 rounded bg-badge-warning-bg border border-badge-warning-border px-3 py-2 text-xs text-badge-warning mt-3">
-            <AlertTriangle className="size-3.5 mt-0.5 shrink-0" aria-hidden="true" />
-            Ces données proviennent de l&apos;ancien répertoire et n&apos;ont pas été mises à jour
-            depuis 2009.
-          </div>
-        )}
       </article>
     </Skeleton>
   );

@@ -238,8 +238,8 @@ export default function Home() {
           {/* Cards */}
           {!loading && results.map((r) => <AssociationCard key={r.id} result={r} />)}
 
-          {/* Load more */}
-          {!loading && hasMore && !totalCapped && (
+          {/* Load more — 10 at a time until total reached (even when capped) */}
+          {!loading && hasMore && (
             <Button
               type="button"
               variant="outline"

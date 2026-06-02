@@ -1,5 +1,6 @@
 "use client";
 
+import "@/bones/registry";
 import { useState } from "react";
 import { MapPin, Globe, Calendar, Clock, Users, AlertTriangle } from "lucide-react";
 import { Skeleton } from "boneyard-js/react";

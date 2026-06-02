@@ -3,9 +3,13 @@
 
 # Assearch — Backend
 
-Fast search API for French associations. FastAPI + Elasticsearch.
+FastAPI search API backed by Elasticsearch. Includes an offline ETL pipeline that downloads RNA datasets from data.gouv.fr and indexes them.
+
+> **Running locally for the first time?** See the [root README](../README.md) for step-by-step setup.
 
 All commands below run from the `backend/` directory.
+
+---
 
 ## Setup
 
@@ -13,27 +17,23 @@ Requires [uv](https://docs.astral.sh/uv/getting-started/installation/).
 
 ```bash
 uv sync
-uv run opentelemetry-bootstrap -a install
 ```
 
-Copy `.env.example` to `.env` and fill in your Grafana OTLP token.
+---
 
-## Running
+## Dev server
 
 ```bash
-# Dev
 uv run fastapi dev
-
-# Dev with telemetry
-uv run --env-file .env opentelemetry-instrument fastapi dev
-
-# Production
-uv run fastapi run
 ```
+
+The API listens on [http://localhost:8000](http://localhost:8000). Requires Elasticsearch running (see Docker section below).
+
+---
 
 ## Data pipeline
 
-Downloads association datasets from data.gouv.fr and indexes them into Elasticsearch.
+Downloads two RNA parquet datasets from data.gouv.fr and indexes them into Elasticsearch.
 
 ```bash
 # Full run (download + index)
@@ -44,6 +44,20 @@ PYTHONPATH=src uv run --group data-pipeline python -m data_pipeline.cli download
 PYTHONPATH=src uv run --group data-pipeline python -m data_pipeline.cli index
 ```
 
+**Data sources:**
+- `waldec` — current RNA data (updated regularly)
+- `import` — legacy data for associations not updated since 2009; hidden in search by default
+
+---
+
+## Environment variables
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `ELASTICSEARCH_URL` | `http://localhost:9200` | API + pipeline |
+
+---
+
 ## Tests, linting, formatting
 
 ```bash
@@ -52,20 +66,24 @@ uvx ruff check . --fix
 uvx ruff format .
 ```
 
+---
+
 ## Docker
-
-Build and run standalone (from `backend/`):
-
-```bash
-docker build -t assearch .
-docker run --rm --env-file .env -p 8000:8000 assearch
-```
 
 Run full stack (from repo root):
 
 ```bash
 docker compose up --build
 ```
+
+Build and run standalone (from `backend/`):
+
+```bash
+docker build -t assearch .
+docker run --rm -p 8000:8000 assearch
+```
+
+---
 
 ## License
 

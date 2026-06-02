@@ -1,8 +1,12 @@
 # Assearch — Frontend
 
-Next.js + shadcn/ui search interface for the Assearch API.
+Next.js search interface for the Assearch API.
+
+> **Running locally for the first time?** See the [root README](../README.md) for step-by-step setup.
 
 All commands run from the `frontend/` directory.
+
+---
 
 ## Setup
 
@@ -12,15 +16,37 @@ Requires [Bun](https://bun.sh).
 bun install
 ```
 
-Set `NEXT_PUBLIC_API_URL` in `.env.local` to point at the backend (default: `http://localhost:8000`).
+To point at a non-local backend, create `.env.local`:
 
-## Running
+```bash
+NEXT_PUBLIC_API_URL=http://your-api-host:8000
+```
+
+Default is `http://localhost:8000`.
+
+---
+
+## Dev server
 
 ```bash
 bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+---
+
+## Skeleton capture (boneyard)
+
+Loading skeletons are auto-generated from the real card layout by [boneyard-js](https://github.com/0xGF/boneyard). After the app is running with real search results visible, regenerate captures:
+
+```bash
+npx boneyard-js build
+```
+
+Commit the `.bones/` output so skeletons stay accurate in production.
+
+---
 
 ## Deploy
 

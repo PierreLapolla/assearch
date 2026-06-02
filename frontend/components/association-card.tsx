@@ -77,6 +77,7 @@ export function AssociationCard({ result, loading = false }: Props) {
   const dateCreat = formatDate(result?.date_creat ?? null);
   const dateDisso = formatDate(result?.date_disso ?? null);
   const website = normalizeUrl(result?.website ?? null);
+  const websiteOk = result?.website_ok ?? null;
 
   const longDescription = (result?.description?.length ?? 0) > 220;
   const descriptionText =
@@ -183,16 +184,36 @@ export function AssociationCard({ result, loading = false }: Props) {
               </span>
             )}
             {website && (
-              <a
-                href={website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-xs text-primary hover:underline"
-              >
-                <Globe className="size-3" aria-hidden="true" />
-                {safeHostname(website)}
-                <ExternalLink className="size-2.5 opacity-60" aria-hidden="true" />
-              </a>
+              websiteOk === false ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <a
+                      href={website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-xs text-muted-foreground line-through hover:no-underline opacity-60"
+                    >
+                      <Globe className="size-3" aria-hidden="true" />
+                      {safeHostname(website)}
+                      <ExternalLink className="size-2.5" aria-hidden="true" />
+                    </a>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-52 text-center">
+                    Ce lien semble inaccessible — les données RNA peuvent être obsolètes.
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <a
+                  href={website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-xs text-primary hover:underline"
+                >
+                  <Globe className="size-3" aria-hidden="true" />
+                  {safeHostname(website)}
+                  <ExternalLink className="size-2.5 opacity-60" aria-hidden="true" />
+                </a>
+              )
             )}
 
           </div>

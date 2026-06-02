@@ -8,6 +8,7 @@ export interface SearchResult {
   city: string | null;
   postal_code: string | null;
   website: string | null;
+  website_ok: boolean | null;
   date_creat: string | null;
   date_disso: string | null;
   position: string | null;

@@ -14,6 +14,7 @@ from data_pipeline.sources import (
     parquet_sources,
 )
 from data_pipeline.transform import iter_documents, row_count
+from data_pipeline.url_check import check_urls
 
 INDEX_SETTINGS = {
     "number_of_replicas": 0,
@@ -51,6 +52,7 @@ INDEX_MAPPINGS = {
         "city": {"type": "keyword"},
         "postal_code": {"type": "keyword"},
         "website": {"type": "keyword", "ignore_above": 512},
+        "website_ok": {"type": "boolean"},
         "date_creat": {"type": "date", "format": "yyyy-MM-dd||strict_date_optional_time"},
         "date_disso": {"type": "date", "format": "yyyy-MM-dd||strict_date_optional_time"},
         "position": {"type": "keyword"},
@@ -92,23 +94,38 @@ def create_index(client: Elasticsearch, *, index_name: str = INDEX_NAME) -> None
     )
 
 
+def collect_website_urls(sources: list[tuple[str, Path]]) -> dict[str, str]:
+    """Returns {doc_id: normalized_url} for all documents that have a website."""
+    result: dict[str, str] = {}
+    for source, path in sources:
+        for doc in iter_documents(source, path):
+            if doc.get("website"):
+                result[doc["_id"]] = doc["website"]
+    return result
+
+
 def bulk_actions(
     source: str,
     path: Path,
+    website_ok_by_id: dict[str, bool],
     *,
     index_name: str = INDEX_NAME,
 ) -> Iterator[dict[str, Any]]:
     documents = progbar(
         iter_documents(source, path),
-        desc=f"Preparing {source}",
+        desc=f"Indexing {source}",
         total=row_count(path),
     )
     for document in documents:
+        doc_id = document["_id"]
+        source_doc = {key: value for key, value in document.items() if key != "_id"}
+        if document.get("website"):
+            source_doc["website_ok"] = website_ok_by_id.get(doc_id)
         yield {
             "_op_type": "index",
             "_index": index_name,
-            "_id": document["_id"],
-            "_source": {key: value for key, value in document.items() if key != "_id"},
+            "_id": doc_id,
+            "_source": source_doc,
         }
 
 
@@ -116,12 +133,13 @@ def index_source(
     client: Elasticsearch,
     source: str,
     path: Path,
+    website_ok_by_id: dict[str, bool],
     *,
     index_name: str = INDEX_NAME,
 ) -> None:
     for ok, item in streaming_bulk(
         client,
-        bulk_actions(source, path, index_name=index_name),
+        bulk_actions(source, path, website_ok_by_id, index_name=index_name),
         chunk_size=BATCH_SIZE,
         max_chunk_bytes=10 * 1024 * 1024,
         request_timeout=180,
@@ -146,9 +164,25 @@ def index_data(
     client.indices.put_settings(index=index_name, settings={"refresh_interval": "-1"})
     client.cluster.health(index=index_name, wait_for_status="yellow", timeout="60s")
 
-    sources = parquet_sources(data_path=data_path)
+    sources = list(parquet_sources(data_path=data_path))
+
+    # Phase 1: collect all website URLs across both sources
+    print("Collecting website URLs…")
+    url_by_id = collect_website_urls(sources)
+    print(f"  {len(url_by_id):,} URLs found")
+
+    # Phase 2: check reachability concurrently
+    print("Checking URLs…")
+    url_status = check_urls(url_by_id.values())
+    reachable = sum(url_status.values())
+    print(f"  {reachable:,}/{len(url_status):,} URLs reachable")
+
+    # Phase 3: build doc_id → website_ok lookup
+    website_ok_by_id = {doc_id: url_status[url] for doc_id, url in url_by_id.items()}
+
+    # Phase 4: index
     for source, path in sources:
-        index_source(client, source, path, index_name=index_name)
+        index_source(client, source, path, website_ok_by_id, index_name=index_name)
 
     client.indices.refresh(index=index_name)
     client.indices.put_settings(index=index_name, settings={"refresh_interval": "1s"})

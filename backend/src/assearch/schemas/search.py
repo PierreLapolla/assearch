@@ -11,6 +11,7 @@ class SearchResult(BaseModel):
     city: str | None = None
     postal_code: str | None = None
     website: str | None = None
+    website_ok: bool | None = None
     date_creat: str | None = None
     date_disso: str | None = None
     position: str | None = None

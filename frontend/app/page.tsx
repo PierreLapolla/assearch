@@ -2,11 +2,10 @@
 
 import { useReducer } from "react";
 import { toast } from "sonner";
-import { Search, Info } from "lucide-react";
+import { Search, Clock, AlertTriangle } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { AssociationCard } from "@/components/association-card";
 import type { SearchResponse, SearchResult } from "@/lib/types";
 
@@ -19,6 +18,7 @@ type State = {
   query: string;
   results: SearchResult[];
   total: number | null;
+  totalCapped: boolean;
   loading: boolean;
   loadingMore: boolean;
   includeLegacy: boolean;
@@ -27,9 +27,9 @@ type State = {
 
 type Action =
   | { type: "SET_QUERY"; query: string }
-  | { type: "SET_LEGACY"; includeLegacy: boolean }
+  | { type: "TOGGLE_LEGACY" }
   | { type: "SEARCH_START" }
-  | { type: "SEARCH_SUCCESS"; results: SearchResult[]; total: number }
+  | { type: "SEARCH_SUCCESS"; results: SearchResult[]; total: number; totalCapped: boolean }
   | { type: "SEARCH_ERROR" }
   | { type: "LOAD_MORE_START" }
   | { type: "LOAD_MORE_SUCCESS"; results: SearchResult[] }
@@ -39,6 +39,7 @@ const initialState: State = {
   query: "",
   results: [],
   total: null,
+  totalCapped: false,
   loading: false,
   loadingMore: false,
   includeLegacy: false,
@@ -49,14 +50,20 @@ function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "SET_QUERY":
       return { ...state, query: action.query };
-    case "SET_LEGACY":
-      return { ...state, includeLegacy: action.includeLegacy };
+    case "TOGGLE_LEGACY":
+      return { ...state, includeLegacy: !state.includeLegacy };
     case "SEARCH_START":
       return { ...state, loading: true, hasSearched: true };
     case "SEARCH_SUCCESS":
-      return { ...state, loading: false, results: action.results, total: action.total };
+      return {
+        ...state,
+        loading: false,
+        results: action.results,
+        total: action.total,
+        totalCapped: action.totalCapped,
+      };
     case "SEARCH_ERROR":
-      return { ...state, loading: false, results: [], total: null };
+      return { ...state, loading: false, results: [], total: null, totalCapped: false };
     case "LOAD_MORE_START":
       return { ...state, loadingMore: true };
     case "LOAD_MORE_SUCCESS":
@@ -88,7 +95,8 @@ async function fetchResults(
 
 export default function Home() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { query, results, total, loading, loadingMore, includeLegacy, hasSearched } = state;
+  const { query, results, total, totalCapped, loading, loadingMore, includeLegacy, hasSearched } =
+    state;
 
   const hasMore = total !== null && results.length < total;
 
@@ -98,7 +106,12 @@ export default function Home() {
     dispatch({ type: "SEARCH_START" });
     try {
       const data = await fetchResults(query.trim(), 0, includeLegacy);
-      dispatch({ type: "SEARCH_SUCCESS", results: data.results, total: data.total });
+      dispatch({
+        type: "SEARCH_SUCCESS",
+        results: data.results,
+        total: data.total,
+        totalCapped: data.total_capped,
+      });
     } catch (err) {
       dispatch({ type: "SEARCH_ERROR" });
       toast.error("Recherche échouée", {
@@ -133,7 +146,7 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Single-line search form */}
+          {/* Single-line search */}
           <form onSubmit={handleSearch}>
             <div className="flex shadow-sm">
               {/* Query input */}
@@ -161,26 +174,24 @@ export default function Home() {
                 {loading ? "Recherche…" : "Rechercher"}
               </Button>
 
-              {/* Legacy toggle — compact checkbox with tooltip */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <label className="flex items-center gap-1.5 h-14 px-3 bg-card border border-input border-l-0 rounded-r-sm cursor-pointer shrink-0 hover:bg-muted/50 transition-colors">
-                    <Checkbox
-                      checked={includeLegacy}
-                      onCheckedChange={(v) =>
-                        dispatch({ type: "SET_LEGACY", includeLegacy: !!v })
-                      }
-                      aria-label="Inclure les associations historiques"
-                      className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                    />
-                    <Info className="size-3.5 text-muted-foreground" aria-hidden="true" />
-                  </label>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-56 text-center">
-                  Inclure les associations historiques (données antérieures à 2009, non mises à
-                  jour)
-                </TooltipContent>
-              </Tooltip>
+              {/* Legacy filter chip — amber = same language as card badges */}
+              <button
+                type="button"
+                onClick={() => dispatch({ type: "TOGGLE_LEGACY" })}
+                aria-pressed={includeLegacy}
+                title="Inclure les associations historiques (données antérieures à 2009, non mises à jour)"
+                className={cn(
+                  "flex items-center gap-1.5 h-14 px-3 border border-l-0 rounded-r-sm shrink-0 transition-colors text-xs font-medium cursor-pointer",
+                  includeLegacy
+                    ? "bg-badge-warning-bg text-badge-warning border-badge-warning-border"
+                    : "bg-card text-muted-foreground border-input hover:bg-muted/50",
+                )}
+              >
+                <Clock className="size-3.5 shrink-0" aria-hidden="true" />
+                <span className="hidden sm:inline whitespace-nowrap">
+                  {includeLegacy ? "Av. 2009 ✓" : "Av. 2009"}
+                </span>
+              </button>
             </div>
           </form>
         </div>
@@ -189,40 +200,46 @@ export default function Home() {
       {/* Results */}
       <section className="flex-1 py-8 px-4 bg-background">
         <div className="mx-auto max-w-3xl space-y-4">
-          {/* Count banner */}
+          {/* Count + cap warning */}
           {!loading && total !== null && total > 0 && (
-            <div className="flex items-baseline justify-between">
+            <div className="flex flex-wrap items-center gap-3">
               <p className="text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">
-                  {results.length.toLocaleString("fr-FR")}
-                </span>
-                {total > results.length && (
+                {totalCapped ? (
                   <>
-                    {" "}sur{" "}
+                    <span className="font-medium text-foreground">{results.length}</span> résultat
+                    {results.length !== 1 ? "s" : ""} affichés
+                  </>
+                ) : (
+                  <>
+                    <span className="font-medium text-foreground">
+                      {results.length.toLocaleString("fr-FR")}
+                    </span>{" "}
+                    sur{" "}
                     <span className="font-medium text-foreground">
                       {total.toLocaleString("fr-FR")}
-                    </span>
+                    </span>{" "}
+                    résultat{total !== 1 ? "s" : ""}
                   </>
-                )}{" "}
-                résultat{total !== 1 ? "s" : ""}
+                )}
               </p>
-              {hasMore && (
-                <p className="text-xs text-muted-foreground">
-                  Affinez la recherche pour de meilleurs résultats
-                </p>
+              {totalCapped && (
+                <span className="flex items-center gap-1.5 text-xs text-badge-warning bg-badge-warning-bg border border-badge-warning-border rounded px-2 py-0.5">
+                  <AlertTriangle className="size-3 shrink-0" aria-hidden="true" />
+                  Plus de {total} résultats — précisez votre recherche
+                </span>
               )}
             </div>
           )}
 
-          {/* Skeleton placeholders */}
+          {/* Skeletons */}
           {loading &&
             Array.from({ length: PAGE_SIZE }).map((_, i) => <AssociationCard key={i} loading />)}
 
-          {/* Result cards */}
+          {/* Cards */}
           {!loading && results.map((r) => <AssociationCard key={r.id} result={r} />)}
 
           {/* Load more */}
-          {!loading && hasMore && (
+          {!loading && hasMore && !totalCapped && (
             <Button
               type="button"
               variant="outline"

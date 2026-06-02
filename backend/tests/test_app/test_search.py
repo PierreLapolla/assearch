@@ -41,6 +41,7 @@ def test_search() -> None:
     assert response.model_dump() == {
         "query": "football",
         "total": 1,
+        "total_capped": False,
         "results": [
             {
                 "id": "1",

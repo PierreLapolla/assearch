@@ -10,6 +10,7 @@ from assearch.schemas.search import SearchResponse, SearchResult
 ELASTICSEARCH_URL = getenv("ELASTICSEARCH_URL", "http://localhost:9200")
 INDEX_NAME = "associations"
 SEARCH_FIELDS = ("title^3", "description", "address", "city^2", "postal_code", "website")
+TOTAL_HITS_CAP = 100  # ES won't count beyond this; signals user to narrow search
 
 router = APIRouter(prefix="/search", tags=["search"])
 
@@ -32,10 +33,11 @@ ElasticsearchClientDep = Annotated[
 ]
 
 
-def total_hits(value: int | dict[str, Any]) -> int:
+def parse_total(value: int | dict[str, Any]) -> tuple[int, bool]:
+    """Returns (count, capped) where capped=True means count hit TOTAL_HITS_CAP."""
     if isinstance(value, int):
-        return value
-    return int(value.get("value", 0))
+        return value, False
+    return int(value.get("value", 0)), value.get("relation") == "gte"
 
 
 def result_from_hit(hit: dict[str, Any]) -> SearchResult:
@@ -92,6 +94,7 @@ async def search(
             size=limit,
             from_=offset,
             query=es_query,
+            track_total_hits=TOTAL_HITS_CAP,
         )
     except TransportError as error:
         raise HTTPException(
@@ -100,8 +103,10 @@ async def search(
         ) from error
 
     hits = response["hits"]
+    total, total_capped = parse_total(hits["total"])
     return SearchResponse(
         query=query,
-        total=total_hits(hits["total"]),
+        total=total,
+        total_capped=total_capped,
         results=[result_from_hit(hit) for hit in hits["hits"]],
     )

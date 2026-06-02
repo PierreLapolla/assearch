@@ -21,4 +21,5 @@ class SearchResult(BaseModel):
 class SearchResponse(BaseModel):
     query: str
     total: int = Field(ge=0)
+    total_capped: bool = False  # true when total hit the tracking limit
     results: list[SearchResult]

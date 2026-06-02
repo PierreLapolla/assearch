@@ -18,5 +18,6 @@ export interface SearchResult {
 export interface SearchResponse {
   query: string;
   total: number;
+  total_capped: boolean;
   results: SearchResult[];
 }

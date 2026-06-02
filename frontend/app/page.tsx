@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Search, MapPin, Globe, Calendar, Users, AlertTriangle, Clock } from "lucide-react";
+import { Skeleton } from "boneyard-js/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -68,153 +68,127 @@ function formatWebsite(url: string | null): string | null {
   return url.startsWith("http") ? url : `https://${url}`;
 }
 
-function AssociationCard({ result }: { result: SearchResult }) {
+function AssociationCard({ result, loading = false }: { result?: SearchResult; loading?: boolean }) {
   const [expanded, setExpanded] = useState(false);
-  const isLegacy = result.source === "import";
-  const posInfo = result.position ? POSITION_LABELS[result.position] : null;
-  const groupLabel = result.groupement ? GROUPEMENT_LABELS[result.groupement] : null;
-  const dateCreat = formatDate(result.date_creat);
-  const dateDisso = formatDate(result.date_disso);
-  const website = formatWebsite(result.website);
 
-  const longDescription = result.description && result.description.length > 220;
+  const isLegacy = result?.source === "import";
+  const posInfo = result?.position ? POSITION_LABELS[result.position] : null;
+  const groupLabel = result?.groupement ? GROUPEMENT_LABELS[result.groupement] : null;
+  const dateCreat = formatDate(result?.date_creat ?? null);
+  const dateDisso = formatDate(result?.date_disso ?? null);
+  const website = formatWebsite(result?.website ?? null);
+  const longDescription = result?.description && result.description.length > 220;
   const descriptionText =
-    longDescription && !expanded ? result.description!.slice(0, 220) + "…" : result.description;
+    longDescription && !expanded ? result!.description!.slice(0, 220) + "…" : result?.description;
 
   return (
-    <Card className="transition-shadow hover:shadow-md">
-      <CardHeader className="pb-2">
-        <div className="flex flex-wrap items-start gap-2">
-          <CardTitle className="text-base font-semibold leading-snug flex-1 min-w-0">
-            {result.title ?? "Sans titre"}
-          </CardTitle>
-          <div className="flex flex-wrap gap-1.5 shrink-0">
-            {isLegacy && (
-              <Badge
-                variant="outline"
-                className="text-xs text-amber-600 border-amber-300 bg-amber-50"
-              >
-                Historique
-              </Badge>
-            )}
-            {posInfo && (
-              <Badge variant={posInfo.variant} className="text-xs">
-                {posInfo.label}
-              </Badge>
-            )}
-          </div>
-        </div>
-        {groupLabel && (
-          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-            <Users className="size-3" />
-            {groupLabel}
-          </p>
-        )}
-      </CardHeader>
-
-      <CardContent className="space-y-3">
-        {result.description && (
-          <div>
-            <p className="text-sm text-muted-foreground leading-relaxed">{descriptionText}</p>
-            {longDescription && (
-              <button
-                type="button"
-                onClick={() => setExpanded(!expanded)}
-                className="text-xs text-primary hover:underline mt-1 cursor-pointer"
-              >
-                {expanded ? "Voir moins" : "Voir plus"}
-              </button>
-            )}
-          </div>
-        )}
-
-        {(result.address || result.city || result.postal_code) && (
-          <>
-            <Separator />
-            <div className="flex items-start gap-1.5 text-sm text-muted-foreground">
-              <MapPin className="size-3.5 mt-0.5 shrink-0" />
-              <span>
-                {[
-                  result.address,
-                  result.city && result.postal_code
-                    ? `${result.city} (${result.postal_code})`
-                    : (result.city ?? result.postal_code),
-                ]
-                  .filter(Boolean)
-                  .join(" — ")}
-              </span>
-            </div>
-          </>
-        )}
-
-        {(dateCreat || dateDisso || website) && (
-          <>
-            <Separator />
-            <div className="flex flex-wrap gap-x-4 gap-y-1.5">
-              {dateCreat && (
-                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Calendar className="size-3" />
-                  Créée le {dateCreat}
-                </span>
-              )}
-              {dateDisso && (
-                <span className="flex items-center gap-1.5 text-xs text-amber-600">
-                  <Clock className="size-3" />
-                  Dissoute le {dateDisso}
-                </span>
-              )}
-              {website && (
-                <a
-                  href={website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs text-primary hover:underline"
+    <Skeleton name="association-card" loading={loading} animate="shimmer">
+      <Card className="transition-shadow hover:shadow-md">
+        <CardHeader className="pb-2">
+          <div className="flex flex-wrap items-start gap-2">
+            <CardTitle className="text-base font-semibold leading-snug flex-1 min-w-0">
+              {result?.title ?? "Sans titre"}
+            </CardTitle>
+            <div className="flex flex-wrap gap-1.5 shrink-0">
+              {isLegacy && (
+                <Badge
+                  variant="outline"
+                  className="text-xs text-amber-600 border-amber-300 bg-amber-50"
                 >
-                  <Globe className="size-3" />
-                  {safeHostname(website)}
-                </a>
+                  Historique
+                </Badge>
+              )}
+              {posInfo && (
+                <Badge variant={posInfo.variant} className="text-xs">
+                  {posInfo.label}
+                </Badge>
               )}
             </div>
-          </>
-        )}
-
-        {isLegacy && (
-          <div className="flex items-start gap-1.5 rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700">
-            <AlertTriangle className="size-3.5 mt-0.5 shrink-0" />
-            Ces données proviennent de l&apos;ancien répertoire et n&apos;ont pas été mises à jour
-            depuis 2009.
           </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
+          {groupLabel && (
+            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+              <Users className="size-3" />
+              {groupLabel}
+            </p>
+          )}
+        </CardHeader>
 
-function CardSkeleton() {
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-start gap-2">
-          <Skeleton className="h-5 w-3/4" />
-          <Skeleton className="h-5 w-16 shrink-0" />
-        </div>
-        <Skeleton className="h-3 w-32 mt-1.5" />
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="space-y-1.5">
-          <Skeleton className="h-3.5 w-full" />
-          <Skeleton className="h-3.5 w-5/6" />
-          <Skeleton className="h-3.5 w-4/6" />
-        </div>
-        <Separator />
-        <Skeleton className="h-4 w-2/3" />
-        <Separator />
-        <div className="flex gap-4">
-          <Skeleton className="h-3 w-28" />
-          <Skeleton className="h-3 w-24" />
-        </div>
-      </CardContent>
-    </Card>
+        <CardContent className="space-y-3">
+          {result?.description && (
+            <div>
+              <p className="text-sm text-muted-foreground leading-relaxed">{descriptionText}</p>
+              {longDescription && (
+                <button
+                  type="button"
+                  onClick={() => setExpanded(!expanded)}
+                  className="text-xs text-primary hover:underline mt-1 cursor-pointer"
+                >
+                  {expanded ? "Voir moins" : "Voir plus"}
+                </button>
+              )}
+            </div>
+          )}
+
+          {(result?.address || result?.city || result?.postal_code) && (
+            <>
+              <Separator />
+              <div className="flex items-start gap-1.5 text-sm text-muted-foreground">
+                <MapPin className="size-3.5 mt-0.5 shrink-0" />
+                <span>
+                  {[
+                    result.address,
+                    result.city && result.postal_code
+                      ? `${result.city} (${result.postal_code})`
+                      : (result.city ?? result.postal_code),
+                  ]
+                    .filter(Boolean)
+                    .join(" — ")}
+                </span>
+              </div>
+            </>
+          )}
+
+          {(dateCreat || dateDisso || website) && (
+            <>
+              <Separator />
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                {dateCreat && (
+                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Calendar className="size-3" />
+                    Créée le {dateCreat}
+                  </span>
+                )}
+                {dateDisso && (
+                  <span className="flex items-center gap-1.5 text-xs text-amber-600">
+                    <Clock className="size-3" />
+                    Dissoute le {dateDisso}
+                  </span>
+                )}
+                {website && (
+                  <a
+                    href={website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-xs text-primary hover:underline"
+                  >
+                    <Globe className="size-3" />
+                    {safeHostname(website)}
+                  </a>
+                )}
+              </div>
+            </>
+          )}
+
+          {isLegacy && (
+            <div className="flex items-start gap-1.5 rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700">
+              <AlertTriangle className="size-3.5 mt-0.5 shrink-0" />
+              Ces données proviennent de l&apos;ancien répertoire et n&apos;ont pas été mises à
+              jour depuis 2009.
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </Skeleton>
   );
 }
 
@@ -304,7 +278,7 @@ export default function Home() {
         {loading && (
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
-              <CardSkeleton key={i} />
+              <AssociationCard key={i} loading={true} />
             ))}
           </div>
         )}

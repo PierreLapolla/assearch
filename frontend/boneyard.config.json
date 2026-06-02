@@ -1,0 +1,5 @@
+{
+  "breakpoints": [375, 768, 1280],
+  "outputDir": ".bones",
+  "animate": "shimmer"
+}

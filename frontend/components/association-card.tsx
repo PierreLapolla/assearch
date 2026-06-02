@@ -57,13 +57,6 @@ function safeHostname(url: string): string {
   }
 }
 
-/** Official government page for this association (waldec only). */
-function govUrl(source: string | null | undefined, id: string | null | undefined): string | null {
-  if (source === "waldec" && id) {
-    return `https://annuaire-entreprises.data.gouv.fr/association/${id}`;
-  }
-  return null;
-}
 
 interface Props {
   result?: SearchResult;
@@ -84,7 +77,6 @@ export function AssociationCard({ result, loading = false }: Props) {
   const dateCreat = formatDate(result?.date_creat ?? null);
   const dateDisso = formatDate(result?.date_disso ?? null);
   const website = normalizeUrl(result?.website ?? null);
-  const officialLink = govUrl(result?.source, result?.id);
 
   const longDescription = (result?.description?.length ?? 0) > 220;
   const descriptionText =
@@ -98,8 +90,7 @@ export function AssociationCard({ result, loading = false }: Props) {
     result?.postal_code ||
     dateCreat ||
     dateDisso ||
-    website ||
-    officialLink;
+    website;
 
   return (
     <Skeleton name="association-card" loading={loading} animate="shimmer">
@@ -203,17 +194,7 @@ export function AssociationCard({ result, loading = false }: Props) {
                 <ExternalLink className="size-2.5 opacity-60" aria-hidden="true" />
               </a>
             )}
-            {officialLink && (
-              <a
-                href={officialLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary hover:underline"
-              >
-                <ExternalLink className="size-3" aria-hidden="true" />
-                Fiche officielle
-              </a>
-            )}
+
           </div>
         )}
 

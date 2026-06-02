@@ -123,7 +123,7 @@ export default function Home() {
               </div>
               <Button
                 type="submit"
-                disabled={loading || !query.trim()}
+                disabled={loading}
                 className="h-14 px-8 rounded-l-none text-base font-medium bg-primary hover:bg-primary-hover text-primary-foreground border-0"
               >
                 {loading ? "Recherche…" : "Rechercher"}

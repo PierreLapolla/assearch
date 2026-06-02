@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
+import "../bones/registry";
 
 export const metadata: Metadata = {
   title: "Assearch — Répertoire National des Associations",

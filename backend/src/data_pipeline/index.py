@@ -153,3 +153,6 @@ def index_data(
 
     client.indices.refresh(index=index_name)
     client.indices.put_settings(index=index_name, settings={"refresh_interval": "1s"})
+
+    count = client.count(index=index_name)["count"]
+    print(f"Indexed {count:,} documents in '{index_name}'.")

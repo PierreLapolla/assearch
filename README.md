@@ -30,7 +30,7 @@ docker compose up --build
 This starts three services:
 - **Elasticsearch** — stores and searches associations
 - **API** — backend on [http://localhost:8000](http://localhost:8000)
-- **Frontend** — search UI on [http://localhost:3000](http://localhost:3000)
+- **Frontend** — search UI on [http://localhost:3001](http://localhost:3001)
 
 Wait until the frontend is ready (1–3 minutes on first run — Elasticsearch takes the longest).
 
@@ -55,7 +55,7 @@ This downloads the RNA datasets from [data.gouv.fr](https://www.data.gouv.fr) an
 
 ### You're ready
 
-Open [http://localhost:3000](http://localhost:3000), type a search term (a name, a city, a topic), and press **Rechercher**.
+Open [http://localhost:3001](http://localhost:3001), type a search term (a name, a city, a topic), and press **Rechercher**.
 
 ---
 
@@ -79,7 +79,7 @@ Indexed data is saved in a Docker volume. Next time you start, skip Step 2 — t
 
 **No results when searching** — the data pipeline (Step 2) may not have finished. Check that terminal for errors and re-run if needed.
 
-**Port already in use** — something else is using port 3000, 8000, or 9200. Stop that process, or see the sub-READMEs for how to change ports.
+**Port already in use** — something else is using port 3001, 8000, or 9200. Stop that process, or see the sub-READMEs for how to change ports.
 
 ---
 

@@ -7,7 +7,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "doctor": "npx react-doctor@latest"
   },
   "dependencies": {
     "boneyard-js": "^1.8.1",
@@ -31,7 +30,6 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
-    "react-doctor": "^0.2.9",
     "tailwindcss": "^4",
     "typescript": "^5"
   },

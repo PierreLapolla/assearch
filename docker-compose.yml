@@ -52,6 +52,7 @@ services:
       - "9200:9200"
     volumes:
       - elasticsearch-data:/usr/share/elasticsearch/data
+      - ./docker/es-log4j2.properties:/usr/share/elasticsearch/config/log4j2.properties:ro
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health || exit 1"]
       interval: 10s

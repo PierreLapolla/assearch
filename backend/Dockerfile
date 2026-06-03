@@ -22,9 +22,6 @@ COPY src /app/src
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-editable
 
-RUN --mount=type=cache,target=/root/.cache/pip \
-    opentelemetry-bootstrap -a install
-
 
 FROM python:${PYTHON_VERSION}-slim-trixie AS runtime
 
@@ -43,4 +40,4 @@ WORKDIR /app
 
 EXPOSE 8000
 
-ENTRYPOINT ["opentelemetry-instrument", "fastapi", "run"]
+ENTRYPOINT ["fastapi", "run"]

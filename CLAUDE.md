@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 assearch/
 ├── backend/       # FastAPI app + data pipeline (Python/uv)
 ├── frontend/      # Next.js search UI (Bun)
-└── docker-compose.yml  # orchestrates api + elasticsearch
+└── docker-compose.yml  # orchestrates api + elasticsearch + frontend (all-in-one dev)
 ```
 
 ## Backend commands (run from `backend/`)
@@ -49,9 +49,16 @@ bun dev
 
 ## Docker (run from repo root)
 
+Starts api (hot-reload) + elasticsearch + frontend dev server in one command:
+
 ```bash
 docker compose up --build
 ```
+
+Services:
+- Frontend → http://localhost:3001
+- API      → http://localhost:8000
+- ES       → http://localhost:9200
 
 Build backend image standalone (from `backend/`):
 

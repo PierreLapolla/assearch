@@ -47,9 +47,15 @@ INDEX_MAPPINGS = {
         "id": {"type": "keyword"},
         "title": {"type": "text", "analyzer": "french_text"},
         "description": {"type": "text", "analyzer": "french_text"},
+        "address": {"type": "text", "analyzer": "french_text"},
         "city": {"type": "keyword"},
         "postal_code": {"type": "keyword"},
         "website": {"type": "keyword", "ignore_above": 512},
+        "date_creat": {"type": "date", "format": "yyyy-MM-dd||strict_date_optional_time"},
+        "date_disso": {"type": "date", "format": "yyyy-MM-dd||strict_date_optional_time"},
+        "position": {"type": "keyword"},
+        "nature": {"type": "keyword"},
+        "groupement": {"type": "keyword"},
     }
 }
 
@@ -94,7 +100,7 @@ def bulk_actions(
 ) -> Iterator[dict[str, Any]]:
     documents = progbar(
         iter_documents(source, path),
-        desc=f"Preparing {source}",
+        desc=f"Indexing {source}",
         total=row_count(path),
     )
     for document in documents:
@@ -141,8 +147,12 @@ def index_data(
     client.cluster.health(index=index_name, wait_for_status="yellow", timeout="60s")
 
     sources = parquet_sources(data_path=data_path)
+
     for source, path in sources:
         index_source(client, source, path, index_name=index_name)
 
     client.indices.refresh(index=index_name)
     client.indices.put_settings(index=index_name, settings={"refresh_interval": "1s"})
+
+    count = client.count(index=index_name)["count"]
+    print(f"Indexed {count:,} documents in '{index_name}'.")

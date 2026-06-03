@@ -1,23 +1,19 @@
 services:
   api:
     build: ./backend
-    container_name: assearch
-    env_file:
-      - ./backend/.env
+    container_name: assearch-api
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
-
-      # Recommended so metrics/traces are explicitly exported
-      OTEL_METRICS_EXPORTER: otlp
-      OTEL_TRACES_EXPORTER: otlp
-      OTEL_LOGS_EXPORTER: none
-
+      PYTHONPATH: /app/src
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend/src:/app/src
     depends_on:
       elasticsearch:
         condition: service_healthy
-    command: ["--host", "0.0.0.0", "--port", "8000"]
+    entrypoint: ["python", "-m", "uvicorn", "assearch.main:app"]
+    command: ["--reload", "--host", "0.0.0.0", "--port", "8000"]
     healthcheck:
       test:
         [
@@ -27,6 +23,20 @@ services:
       interval: 10s
       timeout: 5s
       retries: 12
+
+  frontend:
+    build: ./frontend
+    container_name: assearch-frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3001:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    depends_on:
+      api:
+        condition: service_healthy
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:9.4.1
@@ -39,6 +49,7 @@ services:
       - "9200:9200"
     volumes:
       - elasticsearch-data:/usr/share/elasticsearch/data
+      - ./docker/es-log4j2.properties:/usr/share/elasticsearch/config/log4j2.properties:ro
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health || exit 1"]
       interval: 10s

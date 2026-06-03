@@ -36,7 +36,7 @@ services:
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8000
       HOSTNAME: 0.0.0.0
-    command: sh -c "bun install && bun dev --hostname 0.0.0.0"
+    command: sh -c "bun install --backend=copyfile && bun dev --hostname 0.0.0.0"
     depends_on:
       api:
         condition: service_healthy

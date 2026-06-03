@@ -5,7 +5,8 @@ import pytest
 from elasticsearch import AsyncElasticsearch, TransportError
 from fastapi import HTTPException
 
-from assearch.api.routes.search import get_elasticsearch_client, parse_total, search
+from assearch.api.dependencies.elasticsearch import get_elasticsearch_client
+from assearch.api.services.search import parse_total, search
 from assearch.main import app
 
 
@@ -139,7 +140,7 @@ def test_get_elasticsearch_client_yields_and_closes() -> None:
     async def _run():
         mock_close = AsyncMock()
         with patch(
-            "assearch.api.routes.search.AsyncElasticsearch"
+            "assearch.api.dependencies.elasticsearch.AsyncElasticsearch"
         ) as mock_es_class:
             mock_instance = mock_es_class.return_value
             mock_instance.close = mock_close

@@ -25,7 +25,7 @@ services:
       retries: 12
 
   frontend:
-    image: oven/bun:1-alpine
+    image: oven/bun:1
     container_name: assearch-frontend
     working_dir: /app
     volumes:
@@ -36,7 +36,7 @@ services:
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8000
       HOSTNAME: 0.0.0.0
-    command: sh -c "bun install && bun dev --hostname 0.0.0.0 --no-turbopack"
+    command: sh -c "bun install && bun dev --hostname 0.0.0.0"
     depends_on:
       api:
         condition: service_healthy

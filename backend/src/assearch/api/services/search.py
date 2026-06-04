@@ -1,6 +1,6 @@
 from typing import Any
 
-from elasticsearch import AsyncElasticsearch, TransportError
+from elasticsearch import AsyncElasticsearch, AuthenticationException, TransportError
 from fastapi import HTTPException, status
 
 from assearch.schemas.search import SearchResponse, SearchResult
@@ -72,6 +72,11 @@ async def search(
             query=es_query,
             track_total_hits=TOTAL_HITS_CAP,
         )
+    except AuthenticationException as error:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Search backend misconfigured",
+        ) from error
     except TransportError as error:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,

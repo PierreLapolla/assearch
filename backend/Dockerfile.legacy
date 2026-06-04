@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 ARG PYTHON_VERSION=3.14
 ARG UV_VERSION=0.11.0
 
@@ -13,11 +14,13 @@ WORKDIR /app
 
 COPY pyproject.toml uv.lock README.md LICENSE /app/
 
-RUN uv sync --locked --no-dev --no-install-project --no-editable
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-dev --no-install-project --no-editable
 
 COPY src /app/src
 
-RUN uv sync --locked --no-dev --no-editable
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-dev --no-editable
 
 
 FROM python:${PYTHON_VERSION}-slim-trixie AS runtime

@@ -9,6 +9,7 @@ from pedros import progbar
 from data_pipeline.sources import (
     BATCH_SIZE,
     DATA_PATH,
+    ELASTICSEARCH_API_KEY,
     ELASTICSEARCH_URL,
     INDEX_NAME,
     parquet_sources,
@@ -16,8 +17,6 @@ from data_pipeline.sources import (
 from data_pipeline.transform import iter_documents, row_count
 
 INDEX_SETTINGS = {
-    "number_of_replicas": 0,
-    "refresh_interval": "-1",
     "analysis": {
         "analyzer": {
             "french_text": {
@@ -62,9 +61,11 @@ INDEX_MAPPINGS = {
 
 def elasticsearch_client(
     elasticsearch_url: str = ELASTICSEARCH_URL,
+    api_key: str | None = ELASTICSEARCH_API_KEY,
 ) -> Elasticsearch:
     return Elasticsearch(
         elasticsearch_url,
+        api_key=api_key,
         request_timeout=180,
         retry_on_timeout=True,
         max_retries=3,
@@ -72,13 +73,7 @@ def elasticsearch_client(
 
 
 def wait_for_elasticsearch(client: Elasticsearch) -> None:
-    health = client.cluster.health(timeout="10s")
-    if health["status"] == "red":
-        allocation = client.cat.allocation(format="json", bytes="gb")
-        raise RuntimeError(
-            "Elasticsearch cluster is red; indexing cannot start. "
-            f"Allocation: {allocation}"
-        )
+    client.info()
 
 
 def create_index(client: Elasticsearch, *, index_name: str = INDEX_NAME) -> None:
@@ -143,8 +138,6 @@ def index_data(
     client = elasticsearch_client(elasticsearch_url)
     wait_for_elasticsearch(client)
     create_index(client, index_name=index_name)
-    client.indices.put_settings(index=index_name, settings={"refresh_interval": "-1"})
-    client.cluster.health(index=index_name, wait_for_status="yellow", timeout="60s")
 
     sources = parquet_sources(data_path=data_path)
 

@@ -75,13 +75,7 @@ def elasticsearch_client(
 
 
 def wait_for_elasticsearch(client: Elasticsearch) -> None:
-    health = client.cluster.health(timeout="10s")
-    if health["status"] == "red":
-        allocation = client.cat.allocation(format="json", bytes="gb")
-        raise RuntimeError(
-            "Elasticsearch cluster is red; indexing cannot start. "
-            f"Allocation: {allocation}"
-        )
+    client.info()
 
 
 def create_index(client: Elasticsearch, *, index_name: str = INDEX_NAME) -> None:

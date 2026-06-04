@@ -8,9 +8,11 @@ from assearch.config import get_settings
 
 
 async def get_elasticsearch_client() -> AsyncIterator[AsyncElasticsearch]:
+    settings = get_settings()
     try:
         client = AsyncElasticsearch(
-            get_settings().elasticsearch_url,
+            settings.elasticsearch_url,
+            api_key=settings.elasticsearch_api_key,
             request_timeout=10,
             retry_on_timeout=True,
             max_retries=2,

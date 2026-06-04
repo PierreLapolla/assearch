@@ -4,7 +4,7 @@ from fastapi import APIRouter, Query, Request
 
 from assearch.api.dependencies.elasticsearch import ElasticsearchClientDep
 from assearch.api.services import search as search_service
-from assearch.main import limiter
+from assearch.limiter import limiter
 from assearch.schemas.search import SearchResponse
 
 router = APIRouter(prefix="/search", tags=["search"])

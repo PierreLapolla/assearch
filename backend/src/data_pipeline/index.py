@@ -138,8 +138,6 @@ def index_data(
     client = elasticsearch_client(elasticsearch_url)
     wait_for_elasticsearch(client)
     create_index(client, index_name=index_name)
-    client.indices.put_settings(index=index_name, settings={"refresh_interval": "-1"})
-    client.cluster.health(index=index_name, wait_for_status="yellow", timeout="60s")
 
     sources = parquet_sources(data_path=data_path)
 

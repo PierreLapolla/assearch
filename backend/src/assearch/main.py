@@ -2,15 +2,13 @@ import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
 
 from assearch.api.router import api_router
+from assearch.limiter import limiter
 
 _DEFAULT_ORIGINS = "http://localhost:3000,http://localhost:3001"
-
-limiter = Limiter(key_func=get_remote_address)
 
 
 def _parse_origins(raw: str) -> list[str]:

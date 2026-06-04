@@ -17,8 +17,6 @@ from data_pipeline.sources import (
 from data_pipeline.transform import iter_documents, row_count
 
 INDEX_SETTINGS = {
-    "number_of_replicas": 0,
-    "refresh_interval": "-1",
     "analysis": {
         "analyzer": {
             "french_text": {

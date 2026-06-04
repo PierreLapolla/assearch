@@ -14,12 +14,12 @@ WORKDIR /app
 
 COPY pyproject.toml uv.lock README.md LICENSE /app/
 
-RUN --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=cache,id=uv-cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-install-project --no-editable
 
 COPY src /app/src
 
-RUN --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=cache,id=uv-cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-editable
 
 

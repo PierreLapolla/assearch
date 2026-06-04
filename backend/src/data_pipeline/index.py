@@ -9,6 +9,7 @@ from pedros import progbar
 from data_pipeline.sources import (
     BATCH_SIZE,
     DATA_PATH,
+    ELASTICSEARCH_API_KEY,
     ELASTICSEARCH_URL,
     INDEX_NAME,
     parquet_sources,
@@ -62,9 +63,11 @@ INDEX_MAPPINGS = {
 
 def elasticsearch_client(
     elasticsearch_url: str = ELASTICSEARCH_URL,
+    api_key: str | None = ELASTICSEARCH_API_KEY,
 ) -> Elasticsearch:
     return Elasticsearch(
         elasticsearch_url,
+        api_key=api_key,
         request_timeout=180,
         retry_on_timeout=True,
         max_retries=3,

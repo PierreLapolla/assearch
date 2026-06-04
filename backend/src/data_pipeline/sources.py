@@ -1,8 +1,14 @@
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).parent.parent.parent / ".env")
 
 PROJECT_PATH = Path(__file__).parent.parent.parent
 DATA_PATH = PROJECT_PATH / "data"
-ELASTICSEARCH_URL = "http://localhost:9200"
+ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL", "http://localhost:9200")
+ELASTICSEARCH_API_KEY = os.environ.get("ELASTICSEARCH_API_KEY")
 INDEX_NAME = "associations"
 BATCH_SIZE = 500
 
